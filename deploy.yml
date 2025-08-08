@@ -11,7 +11,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-name: web-db-deployment
+ name: web-db-deployment
 spec:
   replicas: 3
   selector:
@@ -25,27 +25,32 @@ spec:
       containers:
         - name: mysql
           image: mysql:latest
+          ports:
+           - containerPort: 3306
           env:
            - name: MYSQL_DATABASE
              valueFrom:
               configMapKeyRef:
                name: my-config
-               key: MYSQL_USER
-           - name: MYSQL_PASSWORD
+               key: MYSQL_DATABASE
+           - name: MYSQL_USER
              valueFrom:
-             secretKeyRef:
-              name: db-secret
-              key: MYSQL_PASSWORD
-          ports:
-           - containerPort: 3306
+              configMapKeyRef:
+               name: my-config
+               key: MYSQL_USER
+           - name: MYSQL_ROOT_PASSWORD
+             valueFrom:
+              secretKeyRef:
+               name: db-secret
+               key: MYSQL_ROOT_PASSWORD    
         - name: nginx
-          image: nginx
+          image: nginx:latest
           env:
            - name: NGINX_PORT
              valueFrom:
               configMapKeyRef:
-              name: my-config
-              key: NGINX_PORT
+               name: my-config
+               key: NGINX_PORT
           ports:
            - containerPort: 80
 ---
@@ -64,3 +69,4 @@ spec:
     - name: mysql
       port: 3306
       targetPort: 3306
+

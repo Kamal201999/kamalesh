@@ -12,7 +12,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web-db-deployment
-  labels: myapp
+  labels:
+   app: myapp
 spec:
   replicas: 3
   selector:
@@ -27,20 +28,20 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - node01
+             - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                   - node01
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
+           - labelSelector:
               matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - myapp
-            topologyKey: "kubernetes.io/hostname"
+               - key: app
+                 operator: In
+                 values:
+                  - myapp
+          topologyKey: "kubernetes.io/hostname"
       containers:
         - name: mysql
           image: mysql:latest

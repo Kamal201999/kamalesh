@@ -34,7 +34,7 @@ spec:
               values:
               - node01
        podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:   # added soft rule
+        preferredDuringSchedulingIgnoredDuringExecution:   # added soft rule due to sandbox have single node which made failure in pod level
          - weight: 100
            podAffinityTerm:
             labelSelector:

@@ -11,9 +11,9 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web-db-deployment
+  name: nginx-mysql
   labels:
-   app: myapp
+    app: myapp
 spec:
   replicas: 3
   selector:
@@ -28,59 +28,22 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-             - matchExpressions:
-                - key: kubernetes.io/hostname
-                  operator: In
-                  values:
-                   - node01
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-           - labelSelector:
-              matchExpressions:
-               - key: app
-                 operator: In
-                 values:
-                  - myapp
-          topologyKey: "kubernetes.io/hostname"
-      containers:
-        - name: mysql
-          image: mysql:latest
-          ports:
-            - containerPort: 3306
-          env:
-            - name: MYSQL_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  name: my-config
-                  key: MYSQL_DATABASE
-            - name: MYSQL_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: my-config
-                  key: MYSQL_USER
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: MYSQL_ROOT_PASSWORD
-          resources:
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-
-        - name: nginx
-          image: nginx:latest
-          env:
-            - name: NGINX_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: my-config
-                  key: NGINX_PORT
-          ports:
-            - containerPort: 80
+              - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - myapp
+                topologyKey: "kubernetes
 ---
 apiVersion: v1
 kind: Service

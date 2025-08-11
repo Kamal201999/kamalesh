@@ -53,6 +53,13 @@ spec:
                key: NGINX_PORT
           ports:
            - containerPort: 80
+      resources:
+        limits:
+         memory: "256Mi"  # Maximum memory allowed
+         cpu: "200m"       # Maximum CPU allowed (200 milliCPU)
+        requests:
+         memory: "128Mi"  # Initial memory request
+         cpu: "100m"
 ---
 apiVersion: v1
 kind: Service

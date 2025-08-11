@@ -41,9 +41,48 @@ spec:
                matchExpressions:
                 - key: app
                   operator: In
-                   values:
-                    - myapp
+                  values:
+                   - myapp
               topologyKey: kubernetes.io/hostname
+          containers:
+        - name: mysql
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: MYSQL_USER
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: MYSQL_ROOT_PASSWORD
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+
+        - name: nginx
+          image: nginx:latest
+          env:
+            - name: NGINX_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: NGINX_PORT
+          ports:
+            - containerPort: 80     
 ---
 apiVersion: v1
 kind: Service

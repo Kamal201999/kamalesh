@@ -45,11 +45,11 @@ spec:
                   key: MYSQL_ROOT_PASSWORD
           resources:
             limits:
-              memory: "256Mi"
-              cpu: "200m"
+              memory: "1Gi"
+              cpu: "500m"
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: "512Mi"
+              cpu: "250m"
 
         - name: nginx
           image: nginx:latest

@@ -59,7 +59,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: mysql
-          image: mysql:latest
+          image: mysql:8.0
           args:
            - --bind-address=0.0.0.0
            - --default-authentication-plugin=mysql_native_password

@@ -97,7 +97,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             tcpSocket:
-              port: 330
+              port: 3306
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5

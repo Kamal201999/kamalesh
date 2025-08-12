@@ -95,10 +95,10 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 330
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 6
 ---
 # -------------------------
 # MySQL service

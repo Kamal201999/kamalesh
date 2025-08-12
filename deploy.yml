@@ -1,4 +1,6 @@
----
+# -------------------------
+# ConfigMap - Application Config
+# -------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,31 +10,42 @@ data:
   MYSQL_USER: appuser
   NGINX_PORT: "80"
 ---
+# -------------------------
+# MySQL - Deployment
+# -------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web-db-deployment
+  name: mysql
   labels:
-    app: myapp
+    app: mysql
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: mysql
   template:
     metadata:
       labels:
-        app: myapp
+        app: mysql
     spec:
       affinity:
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - node01
+          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+            - weight: 1
+              preference:
+                  matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: In
+                      values:
+                        - node01
+        # requiredDuringSchedulingIgnoredDuringExecution:   -- hard
+        #    nodeSelectorTerms:
+        #     - matchExpressions:
+        #         - key: kubernetes.io/hostname
+        #           operator: In
+        #           values:
+        #             - node01
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
             - weight: 100
@@ -42,7 +55,7 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - myapp
+                        - mysql
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: mysql
@@ -86,7 +99,71 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+---
+# -------------------------
+# MySQL service
+# -------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
 
+---
+# -------------------------
+# Nginx deployment
+# -------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+  labels:
+    app: my-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-nginx
+  template:
+    metadata:
+      labels:
+        app: my-nginx
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+            - weight: 1
+              preference:
+                  matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: In
+                      values:
+                        - node01
+        # requiredDuringSchedulingIgnoredDuringExecution:   -- hard
+        #    nodeSelectorTerms:
+        #     - matchExpressions:
+        #         - key: kubernetes.io/hostname
+        #           operator: In
+        #           values:
+        #             - node01
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - my-nginx
+                topologyKey: "kubernetes.io/hostname"
+      containers:
         - name: nginx
           image: nginx:latest
           env:
@@ -95,6 +172,10 @@ spec:
                 configMapKeyRef:
                   name: my-config
                   key: NGINX_PORT
+            - name: MYSQL_HOST
+              value: "mysql-service"
+            - name: MYSQL_PORT
+              value: "3306"
           ports:
             - containerPort: 80
           livenessProbe:
@@ -114,6 +195,9 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
 ---
+# -------------------------
+# Nginx service LoadBalancer
+# -------------------------
 apiVersion: v1
 kind: Service
 metadata:
@@ -121,12 +205,12 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: myapp
+    app: my-nginx
   ports:
     - name: nginx
       port: 80
       targetPort: 80
-    - name: mysql
+    - name: my-nginx
       port: 3306
       targetPort: 3306
 ---

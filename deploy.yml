@@ -13,7 +13,7 @@ kind: Deployment
 metadata:
   name: web-db-deployment
   labels:
-   app: myapp
+    app: myapp
 spec:
   replicas: 3
   selector:
@@ -25,25 +25,25 @@ spec:
         app: myapp
     spec:
       affinity:
-       nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-         nodeSelectorTerms:
-          - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-              - node01
-       podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:   # added soft rule due to sandbox have single node which made failure in pod level
-         - weight: 100
-           podAffinityTerm:
-            labelSelector:
-             matchExpressions:
-              - key: app
-                operator: In
-                values:
-                 - myapp
-            topologyKey: "kubernetes.io/hostname"
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - node01
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - myapp
+                topologyKey: "kubernetes.io/hostname"
       containers:
         - name: mysql
           image: mysql:latest
@@ -98,4 +98,29 @@ spec:
       targetPort: 80
     - name: mysql
       port: 3306
-      targetPort: 330
+      targetPort: 3306
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myapp-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-db-deployment # matches your deployment name
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 40

@@ -102,6 +102,13 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
+          volumeMounts: 
+           - name: mysql-storage
+             mounthPath: /var/lib/mysql
+    volumes:
+     - name: mysql-storage
+       persistantVolumeClaim:
+        claimName: my-volume
 ---
 # -------------------------
 # MySQL service

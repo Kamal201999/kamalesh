@@ -31,23 +31,16 @@ spec:
     spec:
       affinity:
         nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+          preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 1
               preference:
-                  matchExpressions:
-                    - key: kubernetes.io/hostname
-                      operator: In
-                      values:
-                        - node01
-        # requiredDuringSchedulingIgnoredDuringExecution:   -- hard
-        #    nodeSelectorTerms:
-        #     - matchExpressions:
-        #         - key: kubernetes.io/hostname
-        #           operator: In
-        #           values:
-        #             - node01
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - node01
         podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+          preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               podAffinityTerm:
                 labelSelector:
@@ -61,8 +54,8 @@ spec:
         - name: mysql
           image: mysql:8.0
           args:
-           - --bind-address=0.0.0.0
-           - --default-authentication-plugin=mysql_native_password
+            - --bind-address=0.0.0.0
+            - --default-authentication-plugin=mysql_native_password
           ports:
             - containerPort: 3306
           env:
@@ -103,12 +96,12 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
           volumeMounts: 
-           - name: mysql-storage
-             mounthPath: /var/lib/mysql
-    volumes:
-     - name: mysql-storage
-       persistantVolumeClaim:
-        claimName: my-volume
+            - name: mysql-storage
+              mountPath: /var/lib/mysql   
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:         
+            claimName: my-volume
 ---
 # -------------------------
 # MySQL service
@@ -147,23 +140,16 @@ spec:
     spec:
       affinity:
         nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+          preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 1
               preference:
-                  matchExpressions:
-                    - key: kubernetes.io/hostname
-                      operator: In
-                      values:
-                        - node01
-        # requiredDuringSchedulingIgnoredDuringExecution:   -- hard
-        #    nodeSelectorTerms:
-        #     - matchExpressions:
-        #         - key: kubernetes.io/hostname
-        #           operator: In
-        #           values:
-        #             - node01
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - node01
         podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution: # soft rule due to single-node sandbox
+          preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               podAffinityTerm:
                 labelSelector:
@@ -220,7 +206,3 @@ spec:
     - name: nginx
       port: 80
       targetPort: 80
-    - name: my-nginx
-      port: 3306
-      targetPort: 3306
----

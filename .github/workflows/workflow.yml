@@ -1,25 +1,36 @@
-name: Deploy on killerKoda
+name: Deploy to KillerKoda
+
 on:
   push:
     branches:
-     - main
+      - main  
+
 jobs:
- deploy:
-   runs-on: ubuntu-latest
-   steps:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Checkout repo
       uses: actions/checkout@v4
-    - name: set up kubectl
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: 'latest'
+
+    - name: Configure kubeconfig
       run: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s 
-        https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin
-    - name: setup kubeconfig
+        echo "${{ secrets.KUBECONFIG_DATA }}" > kubeconfig
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl cluster-info
+
+    - name: Apply Secrets
       run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG_DATA }}" >
-        $HOME/.kube/config
-    - name: deploy to kubernetes
-      run: kubectl apply -f 
-    
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl apply -f my-secrets.yml
+
+    - name: Apply PVC and Deployment
+      run: |
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl apply -f my-pvc.yml
+        kubectl apply -f deploy.yml

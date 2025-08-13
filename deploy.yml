@@ -12,51 +12,6 @@ data:
 
 ---
 # -------------------------
-# Secret for MySQL root password
-# -------------------------
-apiVersion: v1
-kind: Secret
-metadata:
-  name: db-secret
-type: Opaque
-stringData:
-  MYSQL_ROOT_PASSWORD: root123
-
----
-# -------------------------
-# Persistent Volume
-# -------------------------
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: my-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/mysql-data"
-  storageClassName: local-path
-
----
-# -------------------------
-# Persistent Volume Claim
-# -------------------------
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-volume
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: local-path
-
----
-# -------------------------
 # MySQL - Deployment
 # -------------------------
 apiVersion: apps/v1

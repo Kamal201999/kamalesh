@@ -9,7 +9,10 @@ spec:
   accessModes:
    - ReadWriteOnce
   hostPath:
-   path: /data/mysql
+#  path: /data/mysql
+   path: "/mnt/data"                # added for killerkoda
+  storageClassName: local-path    
+  
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -21,3 +24,4 @@ spec:
   resources:
     requests:
       storage: 1Gi 
+  storageClassName: local-path
